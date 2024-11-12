@@ -16,11 +16,7 @@ const DMconfig = {
 const app = express();
 const server = app.listen(process.env.PORT || 3978, async function () {
   const { port } = server.address();
-  console.log(
-    '\nServer listening on port %d in %s mode',
-    port,
-    app.settings.env
-  );
+  console.log(`\nServer listening on port ${port} in ${app.settings.env} mode`);
 
   // Setup the tunnel for testing
   if (app.settings.env === 'development') {
@@ -46,6 +42,11 @@ const server = app.listen(process.env.PORT || 3978, async function () {
     const dots = new Array(i + 1).join('.');
     process.stdout.write('Listening' + dots);
   }, 300);
+});
+
+// Default GET route for testing the server
+app.get('/', (req, res) => {
+  res.send('Bot is running!');
 });
 
 // Create bot adapter, which defines how the bot sends and receives messages.
