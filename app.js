@@ -34,14 +34,20 @@ const server = app.listen(process.env.PORT || 3978, async function () {
   }
 
   console.log('\n');
-  let i = 0; // Dots counter
-  setInterval(function () {
-    process.stdout.clearLine();
-    process.stdout.cursorTo(0);
-    i = (i + 1) % 4;
-    const dots = new Array(i + 1).join('.');
-    process.stdout.write('Listening' + dots);
-  }, 300);
+
+  // Output a periodic message for interactive terminals
+  if (process.stdout.isTTY) {
+    let i = 0; // dots counter
+    setInterval(function () {
+      process.stdout.clearLine(); // clear current text
+      process.stdout.cursorTo(0); // move cursor to the beginning of the line
+      i = (i + 1) % 4;
+      const dots = new Array(i + 1).join('.');
+      process.stdout.write('Listening' + dots); // write text
+    }, 300);
+  } else {
+    console.log('Listening...');
+  }
 });
 
 // Default GET route for testing the server
