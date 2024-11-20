@@ -2,7 +2,7 @@
   "name": "teams-voiceflow-integration",
   "version": "1.0.0",
   "description": "MS Teams integration for Voiceflow DM API",
-  "main": "app.js",
+  "main": "node app.js",
   "scripts": {
     "test": "cross-env NODE_ENV=development node app.js",
     "start": "cross-env NODE_ENV=production node app.js"
