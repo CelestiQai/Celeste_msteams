@@ -36,7 +36,7 @@ jobs:
         with:
           name: node-app
           path: |
-            . # Upload the entire project directory
+            .
           retention-days: 5 # Retain artifacts for 5 days
 
   deploy:
