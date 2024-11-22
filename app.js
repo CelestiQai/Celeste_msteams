@@ -1,34 +1,47 @@
-require('dotenv').config();
-const process = require('node:process');
-const express = require('express');
-const axios = require('axios').default;
-const botbuilder = require('botbuilder');
-const { MessageFactory, CardFactory } = require('botbuilder');
-const localtunnel = require('localtunnel');
+// Import environment variables
+import dotenv from 'dotenv';
+dotenv.config();
+
+// Import necessary modules
+import process from 'node:process';
+import express from 'express';
+import axios from 'axios';
+import { BotFrameworkAdapter, MessageFactory, CardFactory } from 'botbuilder';
+import localtunnel from 'localtunnel';
+
+// Initialize tunnel variable
 let tunnel = null;
 
+// Configuration for DM API
 const DMconfig = {
   tts: false,
   stripSSML: false,
 };
 
-// Create HTTP server.
+// Create Express app
 const app = express();
-const server = app.listen(process.env.PORT || 3978, async function () {
+
+// Start the server
+const PORT = process.env.PORT || 3978;
+const server = app.listen(PORT, async () => {
   const { port } = server.address();
   console.log(`\nServer listening on port ${port} in ${app.settings.env} mode`);
 
-  // Setup the tunnel for testing
+  // Setup the tunnel for testing in development environment
   if (app.settings.env === 'development') {
-    tunnel = await localtunnel({
-      port: port,
-      subdomain: process.env.TUNNEL_SUBDOMAIN,
-    });
-    console.log(`\nEndpoint (LocalTunnel): ${tunnel.url}/api/messages`);
+    try {
+      tunnel = await localtunnel({
+        port: port,
+        subdomain: process.env.TUNNEL_SUBDOMAIN,
+      });
+      console.log(`\nEndpoint (LocalTunnel): ${tunnel.url}/api/messages`);
 
-    tunnel.on('close', () => {
-      console.log('\n\nClosing tunnel');
-    });
+      tunnel.on('close', () => {
+        console.log('\n\nClosing tunnel');
+      });
+    } catch (error) {
+      console.error('Error setting up localtunnel:', error);
+    }
   } else {
     console.log(`\nEndpoint (Azure): ${process.env.AZURE_APP_URL}/api/messages`);
   }
@@ -38,11 +51,11 @@ const server = app.listen(process.env.PORT || 3978, async function () {
   // Output a periodic message for interactive terminals
   if (process.stdout.isTTY) {
     let i = 0; // dots counter
-    setInterval(function () {
+    setInterval(() => {
       process.stdout.clearLine(); // clear current text
       process.stdout.cursorTo(0); // move cursor to the beginning of the line
       i = (i + 1) % 4;
-      const dots = new Array(i + 1).join('.');
+      const dots = '.'.repeat(i);
       process.stdout.write('Listening' + dots); // write text
     }, 300);
   } else {
@@ -56,7 +69,7 @@ app.get('/', (req, res) => {
 });
 
 // Create bot adapter, which defines how the bot sends and receives messages.
-const adapter = new botbuilder.BotFrameworkAdapter({
+const adapter = new BotFrameworkAdapter({
   appId: process.env.MicrosoftAppId,
   appPassword: process.env.MicrosoftAppPassword,
 });
@@ -77,7 +90,7 @@ adapter.onTurnError = onTurnErrorHandler;
 
 // Listen for incoming requests at /api/messages.
 app.post('/api/messages', async (req, res) => {
-  adapter.processActivity(req, res, async (turnContext) => {
+  await adapter.processActivity(req, res, async (turnContext) => {
     if (turnContext.activity.type === 'message') {
       const user_id = turnContext.activity.from.id;
       const utterance = turnContext.activity.text;
@@ -99,7 +112,7 @@ async function interact(user_id, request, turnContext) {
   try {
     // Update {user_id} variable with DM API
     await axios.patch(
-      `${process.env.VOICEFLOW_RUNTIME_ENDPOINT}/state/user/${encodeURI(user_id)}/variables`,
+      `${process.env.VOICEFLOW_RUNTIME_ENDPOINT}/state/user/${encodeURIComponent(user_id)}/variables`,
       { user_id },
       {
         headers: {
@@ -111,7 +124,7 @@ async function interact(user_id, request, turnContext) {
 
     // Interact with DM API
     const response = await axios.post(
-      `${process.env.VOICEFLOW_RUNTIME_ENDPOINT}/state/user/${encodeURI(user_id)}/interact`,
+      `${process.env.VOICEFLOW_RUNTIME_ENDPOINT}/state/user/${encodeURIComponent(user_id)}/interact`,
       {
         action: request,
         config: DMconfig,
