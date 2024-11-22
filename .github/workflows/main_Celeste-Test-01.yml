@@ -11,33 +11,21 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      # Step 1: Checkout the repository
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      # Step 2: Set up Node.js environment
       - name: Set up Node.js version
         uses: actions/setup-node@v3
         with:
           node-version: '20.x'
 
-      # Step 3: Install dependencies
       - name: Install dependencies
         run: npm install
 
-      # Step 4: Build the application (if required)
-      # Uncomment if your app requires a build process (e.g., React, Angular, or others)
-      # - name: Build application
-      #   run: npm run build
-
-      # Step 5: Upload all build artifacts for deployment
-      - name: Upload all artifacts for deployment
+      - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: |
-            .
-          retention-days: 5 # Retain artifacts for 5 days
+          path: .
 
   deploy:
     runs-on: ubuntu-latest
@@ -46,31 +34,21 @@ jobs:
       name: 'Production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
     permissions:
-      id-token: write
+      id-token: write # Required for requesting the JWT
 
     steps:
-      # Step 1: Download all build artifacts
-      - name: Download all artifacts
+      - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
           name: node-app
 
-      # Step 2: Login to Azure
-      - name: Azure Login
+      - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_B7E43E6896CF497E87675515EB3484F7 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_B7E8149588A6415BA286CE1CB81B992E }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_3264180B8F954918916B2249CC7DDAF2 }}
 
-      # Step 3: Set Node.js version on Azure App Service
-      - name: Configure Node.js version on Azure
-        run: |
-          az webapp config set --name Celeste-Test-01 \
-            --resource-group BNM \
-            --runtime "node|20-lts"
-
-      # Step 4: Deploy the application to Azure Web App
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         id: deploy-to-webapp
