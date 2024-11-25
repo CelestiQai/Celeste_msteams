@@ -1,23 +1,37 @@
 {
-  "name": "teams-voiceflow-integration",
+  "name": "teams-voiceflow-bot",
   "version": "1.0.0",
-  "description": "MS Teams integration for Voiceflow DM API",
+  "description": "Microsoft Teams Bot with Voiceflow DM API integration",
   "main": "app.js",
   "type": "module",
   "scripts": {
-    "test": "cross-env NODE_ENV=development node app.js",
-    "start": "cross-env NODE_ENV=production node app.js"
+    "dev:teamsfx": "env-cmd --silent -f .localConfigs npm run dev",
+    "dev:teamsfx:testtool": "env-cmd --silent -f .localConfigs.testTool npm run dev",
+    "dev:teamsfx:launch-testtool": "env-cmd --silent -f env/.env.testtool teamsapptester start",
+    "dev": "nodemon --inspect=9239 --signal SIGINT ./app.js",
+    "start": "cross-env NODE_ENV=production node ./app.js",
+    "watch": "nodemon ./app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "Voiceflow",
+  "author": "Voiceflow and Microsoft",
   "license": "ISC",
+  "engines": {
+    "node": "16 || 18"
+  },
   "dependencies": {
     "axios": "^1.6.2",
     "botbuilder": "^4.21.1",
     "dotenv": "^16.4.5",
     "express": "^4.18.2",
-    "localtunnel": "^2.0.2"
+    "localtunnel": "^2.0.2",
+    "restify": "^10.0.0"
   },
   "devDependencies": {
-    "cross-env": "^7.0.3"
+    "cross-env": "^7.0.3",
+    "env-cmd": "^10.1.0",
+    "nodemon": "^2.0.7"
+  },
+  "msteams": {
+    "teamsAppId": null
   }
 }
