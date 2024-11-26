@@ -1,6 +1,3 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-
 name: Build and deploy Node.js app to Azure Web App - celeste-internal-01
 
 on:
@@ -44,19 +41,19 @@ jobs:
         with:
           name: node-app
 
-                # Step 2: Login to Azure
-      - name: Login to Azure
+      # Step 2: Login to Azure for Bot App Registration
+      - name: Login to Azure for Bot App Registration
         uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_D6EB518BD8094DE6B9FC42049E525C34 }}
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_9626B46707D8493AA4D33A30BE8524C9 }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_78520E8D91364C8485FB89B0E819BC8A }}
 
+      # Step 3: Deploy Web App using Publish Profile
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v2
         id: deploy-to-webapp
         with:
           app-name: 'celeste-internal-01'
-          slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_E3B015130B2C4A74B7919990A596F5E6 }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE }}
           package: .
